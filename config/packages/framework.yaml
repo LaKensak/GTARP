@@ -17,6 +17,13 @@ framework:
     php_errors:
         log: true
 
+    cache:
+        pools:
+            doctrine.system_cache_pool:
+                adapter: cache.system
+            doctrine.result_cache_pool:
+                adapter: cache.app
+
 when@test:
     framework:
         test: true
