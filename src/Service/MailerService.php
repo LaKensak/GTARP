@@ -37,7 +37,7 @@ class MailerService
 
         // Création et envoi de l'email
         $email = (new TemplatedEmail())
-            ->from('noreply@forum.local') // Adresse d'expéditeur
+            ->from('isimaoui@gmail.com') // Email vérifié sur Brevo
             ->to($user->getEmail())
             ->subject('Confirmez votre inscription au Forum')
             ->htmlTemplate('emails/confirmation.html.twig')

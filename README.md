@@ -21,10 +21,17 @@ composer install
 ```
 
 2. Configurer l'environnement :
+
+**✅ L'envoi d'emails est déjà configuré !** Le projet utilise Brevo (300 emails/jour gratuits).
+Les emails de confirmation seront envoyés automatiquement sans configuration supplémentaire.
+
+**Note** : Si vous souhaitez utiliser votre propre configuration SMTP, créez un fichier `.env.local` :
 ```bash
-cp .env .env.local
-# Modifier .env.local avec vos paramètres
+cp .env.local.example .env.local
+# Puis modifiez MAILER_DSN dans .env.local
 ```
+
+📖 **Configuration personnalisée** : Consultez [CONFIGURATION_EMAIL.md](CONFIGURATION_EMAIL.md) si besoin
 
 3. Créer la base de données :
 ```bash
