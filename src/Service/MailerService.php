@@ -20,11 +20,7 @@ class MailerService
 
     public function sendConfirmationEmail(User $user): void
     {
-        $confirmationUrl = $this->urlGenerator->generate(
-            'app_confirm_registration',
-            ['token' => $user->getConfirmationToken()],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $confirmationUrl = $this->buildConfirmationUrl($user);
 
         $email = (new TemplatedEmail())
             ->from('isimaoui@gmail.com') // mail
@@ -38,5 +34,14 @@ class MailerService
             ]);
 
         $this->mailer->send($email);
+    }
+
+    public function buildConfirmationUrl(User $user): string
+    {
+        return $this->urlGenerator->generate(
+            'app_confirm_registration',
+            ['token' => $user->getConfirmationToken()],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
     }
 }

@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -21,8 +22,10 @@ class SecurityController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
-        MailerService $mailerService
+        MailerService $mailerService,
+        #[Autowire('%env(MAILER_DSN)%')] string $mailerDsn
     ): Response {
+        // reg
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
@@ -32,6 +35,7 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // save
             $hashedPassword = $passwordHasher->hashPassword(
                 $user,
                 $form->get('plainPassword')->getData()
@@ -52,6 +56,12 @@ class SecurityController extends AbstractController
             $mailerService->sendConfirmationEmail($user);
 
             $this->addFlash('success', 'Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
+
+            if (str_starts_with($mailerDsn, 'file://')) {
+                return $this->render('security/registration_pending.html.twig', [
+                    'confirmationUrl' => $mailerService->buildConfirmationUrl($user),
+                ]);
+            }
 
             $referer = $request->headers->get('referer');
             return $this->redirect($referer ?? $this->generateUrl('app_home'));
