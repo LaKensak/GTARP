@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - Forum{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Créer un compte</h4>
+            </div>
+            <div class="card-body">
+                {# Formulaire d'inscription avec tous les champs demandés #}
+                {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+
+                    {# Champs obligatoires #}
+                    <h5 class="mb-3">Informations obligatoires</h5>
+
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.email) }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(registrationForm.plainPassword.first) }}
+                            {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(registrationForm.plainPassword.second) }}
+                            {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    {{ form_errors(registrationForm.plainPassword) }}
+
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.pseudo) }}
+                        {{ form_widget(registrationForm.pseudo, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(registrationForm.pseudo) }}
+                    </div>
+
+                    <hr>
+
+                    {# Champs optionnels #}
+                    <h5 class="mb-3">Informations optionnelles</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(registrationForm.nom) }}
+                            {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(registrationForm.prenom) }}
+                            {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(registrationForm.age) }}
+                            {{ form_widget(registrationForm.age, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.age) }}
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            {{ form_label(registrationForm.telephone) }}
+                            {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    {# Ville avec auto-complétion #}
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.ville) }}
+                        {{ form_widget(registrationForm.ville, {'attr': {'class': 'form-control', 'id': 'ville-input'}}) }}
+                        <div id="ville-suggestions" class="list-group mt-1" style="display: none;"></div>
+                    </div>
+
+                    <hr>
+
+                    {# Captcha mathématique #}
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Vérification anti-robot</h6>
+                                {{ form_label(registrationForm.captcha) }}
+                                {{ form_widget(registrationForm.captcha, {'attr': {'class': 'form-control', 'style': 'max-width: 150px;'}}) }}
+                                {{ form_errors(registrationForm.captcha) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+
+                {{ form_end(registrationForm) }}
+
+                <hr>
+
+                <p class="text-center mb-0">
+                    Déjà inscrit ?
+                    <a href="{{ path('app_login') }}">Se connecter</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Auto-complétion des villes avec l'API geo.api.gouv.fr
+    const villeInput = document.getElementById('ville-input');
+    const suggestions = document.getElementById('ville-suggestions');
+
+    let timeout = null;
+
+    villeInput?.addEventListener('input', function() {
+        const query = this.value;
+
+        // Attendre que l'utilisateur arrête de taper
+        clearTimeout(timeout);
+
+        if (query.length < 2) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            // Appel à l'API des communes françaises
+            fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+
+                    if (data.length > 0) {
+                        suggestions.style.display = 'block';
+                        data.forEach(ville => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = `${ville.nom} (${ville.codeDepartement})`;
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                villeInput.value = ville.nom;
+                                suggestions.style.display = 'none';
+                            });
+                            suggestions.appendChild(item);
+                        });
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    console.error('Erreur auto-complétion:', err);
+                    suggestions.style.display = 'none';
+                });
+        }, 300);
+    });
+
+    // Fermer les suggestions si on clique ailleurs
+    document.addEventListener('click', function(e) {
+        if (!villeInput?.contains(e.target) && !suggestions?.contains(e.target)) {
+            suggestions.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

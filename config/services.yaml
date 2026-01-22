@@ -1,0 +1,23 @@
+# Configuration des services Symfony
+# Ce fichier configure l'autowiring et l'autoconfiguration
+
+parameters:
+
+services:
+    # Configuration par défaut pour les services
+    _defaults:
+        autowire: true      # Injection automatique des dépendances
+        autoconfigure: true # Configuration automatique des services
+
+    # Enregistrement automatique des classes dans src/
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # Configuration du UserChecker pour vérifier les comptes
+    App\Security\UserChecker:
+        tags:
+            - { name: security.user_checker.main }

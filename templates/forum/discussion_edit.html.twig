@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la discussion - Forum{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        {# Fil d'Ariane #}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_theme_show', {'id': discussion.theme.id}) }}">
+                        {{ discussion.theme.titre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Modifier la discussion</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Modifier la discussion</h4>
+                <small class="text-muted">
+                    Par {{ discussion.auteur.pseudo }} le {{ discussion.createdAt|date('d/m/Y à H:i') }}
+                </small>
+            </div>
+            <div class="card-body">
+                {{ form_start(discussionForm) }}
+                    <div class="mb-3">
+                        {{ form_widget(discussionForm.contenu, {
+                            'attr': {
+                                'class': 'form-control',
+                                'rows': 8
+                            }
+                        }) }}
+                        {{ form_errors(discussionForm.contenu) }}
+                        <div class="text-end mt-1">
+                            <small id="charCount" class="text-muted">
+                                {{ discussion.contenu|length }} / 5000
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_theme_show', {'id': discussion.theme.id}) }}"
+                           class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    </div>
+                {{ form_end(discussionForm) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Compteur de caractères
+    const textarea = document.querySelector('textarea');
+    const charCount = document.getElementById('charCount');
+
+    textarea?.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = count + ' / 5000';
+    });
+</script>
+{% endblock %}

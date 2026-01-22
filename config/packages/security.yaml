@@ -1,0 +1,67 @@
+# Configuration de la sécurité Symfony
+# Gère l'authentification et les rôles des utilisateurs
+
+security:
+    # Algorithme de hashage du mot de passe
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # Provider pour charger les utilisateurs depuis la base de données
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+
+            # Formulaire de connexion
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_home
+                enable_csrf: true
+
+            # Déconnexion
+            logout:
+                path: app_logout
+                target: app_home
+
+            # Se souvenir de moi (optionnel)
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 semaine
+
+    # Hiérarchie des rôles
+    # Les modérateurs ont aussi les droits des utilisateurs normaux
+    role_hierarchy:
+        ROLE_MODERATOR: ROLE_USER
+        ROLE_ADMIN: ROLE_MODERATOR
+
+    # Contrôle d'accès par URL
+    access_control:
+        # Les APIs sont publiques (pour le compteur de connectés)
+        - { path: ^/api, roles: PUBLIC_ACCESS }
+
+        # Les routes de profil nécessitent d'être connecté
+        - { path: ^/profil, roles: ROLE_USER }
+
+        # Les routes modérateur
+        - { path: ^/theme/nouveau, roles: ROLE_MODERATOR }
+        - { path: ^/participants, roles: ROLE_MODERATOR }
+        - { path: ^/discussion/.*/supprimer, roles: ROLE_MODERATOR }
+        - { path: ^/discussion/.*/modifier, roles: ROLE_MODERATOR }
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4

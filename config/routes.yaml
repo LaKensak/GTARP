@@ -1,0 +1,8 @@
+# Configuration des routes
+# Les contrôleurs utilisent les attributs PHP pour définir les routes
+
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute

@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Forum{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Liste des thèmes</h1>
+
+        {# Bouton pour ajouter un thème (modérateurs uniquement) #}
+        {% if is_granted('ROLE_MODERATOR') %}
+            <a href="{{ path('app_theme_new') }}" class="btn btn-success mb-3">
+                + Ajouter un thème
+            </a>
+        {% endif %}
+
+        {# Liste des thèmes #}
+        {% if themes|length > 0 %}
+            <div class="row">
+                {% for theme in themes %}
+                    <div class="col-12 mb-3">
+                        <div class="card theme-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title mb-1">
+                                            <a href="{{ path('app_theme_show', {'id': theme.id}) }}" class="text-decoration-none">
+                                                {{ theme.titre }}
+                                            </a>
+                                        </h5>
+                                        {% if theme.description %}
+                                            <p class="card-text text-muted small">{{ theme.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        {# Nombre de discussions #}
+                                        <span class="badge bg-primary">
+                                            {{ theme.nombreDiscussions }} discussion(s)
+                                        </span>
+
+                                        {# Date dernière discussion #}
+                                        {% if theme.lastDiscussionDate %}
+                                            <br>
+                                            <small class="text-muted">
+                                                Dernière activité : {{ theme.lastDiscussionDate|date('d/m/Y à H:i') }}
+                                            </small>
+                                        {% else %}
+                                            <br>
+                                            <small class="text-muted">Aucune discussion</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Pagination (5 thèmes par page) #}
+            <div class="d-flex justify-content-center">
+                {{ knp_pagination_render(themes) }}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Aucun thème n'a encore été créé.
+                {% if is_granted('ROLE_MODERATOR') %}
+                    <a href="{{ path('app_theme_new') }}">Créer le premier thème</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

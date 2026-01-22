@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Forum{% endblock %}</title>
+
+    {# Bootstrap CSS pour le style #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {# CSS personnalisé #}
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .discussion-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .discussion-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .theme-card {
+            transition: transform 0.2s;
+        }
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .online-counter {
+            font-size: 0.9em;
+            color: #28a745;
+        }
+        .flash-message {
+            margin-top: 10px;
+        }
+        /* Style pour la modale de connexion */
+        .login-modal .modal-body {
+            padding: 20px;
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    {# Barre de navigation #}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">Forum</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
+                    </li>
+
+                    {# Options modérateur #}
+                    {% if is_granted('ROLE_MODERATOR') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_theme_new') }}">Nouveau thème</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_participants') }}">Participants</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    {# Compteur de connectés (mis à jour toutes les 15 secondes) #}
+                    <li class="nav-item">
+                        <span class="nav-link online-counter">
+                            <span id="online-count">0</span> connecté(s)
+                        </span>
+                    </li>
+
+                    {% if app.user %}
+                        {# Utilisateur connecté #}
+                        <li class="nav-item">
+                            <span class="nav-link">Bonjour, <strong>{{ app.user.pseudo }}</strong></span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_profile') }}">Mon profil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
+                        </li>
+                    {% else %}
+                        {# Utilisateur non connecté #}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_register') }}">Inscription</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {# Messages flash #}
+    <div class="container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} flash-message alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    {# Contenu principal #}
+    <main class="container py-4">
+        {% block body %}{% endblock %}
+    </main>
+
+    {# Pied de page #}
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="mb-0 text-muted">Forum - Projet Symfony L3</p>
+        </div>
+    </footer>
+
+    {# Modale de connexion (boîte de dialogue) #}
+    <div class="modal fade login-modal" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Connexion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {# Affichage erreur après 3 tentatives #}
+                    <div id="login-error" class="alert alert-danger d-none"></div>
+
+                    <form id="loginForm" action="{{ path('app_login') }}" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="_username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="_password" required>
+                        </div>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                    </form>
+
+                    <hr>
+                    <p class="text-center mb-0">
+                        Pas encore inscrit ? <a href="{{ path('app_register') }}">Créer un compte</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Bootstrap JS #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {# Script pour le compteur de connectés et le heartbeat #}
+    <script>
+        // Mise à jour du compteur de connectés toutes les 15 secondes
+        function updateOnlineCount() {
+            fetch('/api/online-count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('online-count').textContent = data.count;
+                })
+                .catch(err => console.error('Erreur compteur:', err));
+        }
+
+        // Heartbeat pour maintenir le statut connecté
+        function sendHeartbeat() {
+            {% if app.user %}
+            fetch('/api/heartbeat', { method: 'POST' })
+                .catch(err => console.error('Erreur heartbeat:', err));
+            {% endif %}
+        }
+
+        // Initialisation
+        updateOnlineCount();
+        setInterval(updateOnlineCount, 15000); // 15 secondes
+        setInterval(sendHeartbeat, 15000);
+
+        // Gestion des échecs de connexion (temps de latence après 3 échecs)
+        let loginAttempts = 0;
+        const maxAttempts = 3;
+        const lockoutTime = 5000; // 5 secondes
+
+        document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+            // Note: La vraie gestion des tentatives se fait côté serveur
+            // Ce code est juste pour l'affichage côté client
+        });
+    </script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

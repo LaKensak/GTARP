@@ -1,0 +1,13 @@
+# Configuration de Twig
+# Moteur de templates utilisé pour les vues
+
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    form_themes:
+        - 'bootstrap_5_layout.html.twig'   # Formulaires avec style Bootstrap 5
+    globals:
+        site_name: 'Forum'                  # Nom du site accessible partout
+
+when@test:
+    twig:
+        strict_variables: true
