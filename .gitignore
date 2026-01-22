@@ -1,0 +1,13 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+/INSTALLATION_RAPIDE.md
+/NOTE_POUR_LE_PROFESSEUR.md
+/CHECKLIST_RENDU.md
+###< symfony/framework-bundle ###

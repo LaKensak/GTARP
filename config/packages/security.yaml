@@ -1,0 +1,56 @@
+
+security:
+    # auth
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                use_referer: true
+                failure_handler: App\Security\LoginFailureHandler
+                enable_csrf: true
+
+            logout:
+                path: app_logout
+                target: app_home
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+
+    role_hierarchy:
+        ROLE_MODERATOR: ROLE_USER
+        ROLE_ADMIN: ROLE_MODERATOR
+
+    access_control:
+        - { path: ^/api, roles: PUBLIC_ACCESS }
+
+        - { path: ^/profil, roles: ROLE_USER }
+
+        - { path: ^/theme/nouveau, roles: ROLE_MODERATOR }
+        - { path: ^/participants, roles: ROLE_MODERATOR }
+        - { path: ^/discussion/.*/supprimer, roles: ROLE_MODERATOR }
+        - { path: ^/discussion/.*/modifier, roles: ROLE_MODERATOR }
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4

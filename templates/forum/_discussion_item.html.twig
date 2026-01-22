@@ -1,0 +1,24 @@
+{# item #}
+<div class="discussion-box">
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+            <p class="mb-2">{{ discussion.contenu|nl2br }}</p>
+            <p class="discussion-meta mb-0">
+                Par <strong>{{ discussion.auteur.pseudo }}</strong>
+                le {{ discussion.createdAt|date('d/m/Y') }}
+                à {{ discussion.createdAt|date('H:i') }}
+                {% if discussion.isModified %}
+                    <em>(modifié le {{ discussion.updatedAt|date('d/m/Y à H:i') }})</em>
+                {% endif %}
+            </p>
+        </div>
+        {% if is_granted('ROLE_MODERATOR') %}
+            <div class="ms-3">
+                <a href="{{ path('app_discussion_edit', {'id': discussion.id}) }}"
+                   class="btn btn-sm btn-outline-secondary">Modifier</a>
+                <a href="{{ path('app_discussion_delete', {'id': discussion.id}) }}"
+                   class="btn btn-sm btn-outline-danger">Supprimer</a>
+            </div>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Forum{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Connexion</h4>
+            </div>
+            <div class="card-body">
+                
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{{ path('app_login') }}">
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="inputEmail"
+                               name="_username" value="{{ last_username }}"
+                               required autofocus placeholder="votre@email.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputPassword" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="inputPassword"
+                               name="_password" required placeholder="Votre mot de passe">
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                </form>
+
+                <hr>
+
+                <p class="text-center mb-0">
+                    Pas encore inscrit ?
+                    <a href="{{ path('app_register') }}">Créer un compte</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

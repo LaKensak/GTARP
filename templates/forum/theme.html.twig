@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ theme.titre }} - Forum{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        {# nav #}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item active">{{ theme.titre }}</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-2">{{ theme.titre }}</h1>
+        {% if theme.description %}
+            <p class="text-muted">{{ theme.description }}</p>
+        {% endif %}
+
+        <hr>
+
+        {# top #}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>{{ knp_pagination_render(discussions) }}</div>
+
+            {% if is_granted('ROLE_USER') %}
+                <a href="#add-discussion" class="btn btn-primary btn-sm">+ Ajouter une discussion</a>
+            {% endif %}
+        </div>
+
+        {# list #}
+        <div id="discussion-list">
+            {% if discussions|length > 0 %}
+                {% for discussion in discussions %}
+                    {% include 'forum/_discussion_item.html.twig' with {'discussion': discussion} %}
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    Aucune discussion dans ce thème.
+                    {% if is_granted('ROLE_USER') %}
+                        Soyez le premier à participer !
+                    {% else %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Connectez-vous</a> pour participer.
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        {# bottom #}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>{{ knp_pagination_render(discussions) }}</div>
+
+            {% if is_granted('ROLE_USER') %}
+                <a href="#add-discussion" class="btn btn-primary btn-sm">+ Ajouter une discussion</a>
+            {% endif %}
+        </div>
+
+        {# add #}
+        {% if is_granted('ROLE_USER') %}
+            <div id="add-discussion" class="mt-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Ajouter une discussion</h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="closeFormBtn">
+                            Fermer
+                        </button>
+                    </div>
+                    <div class="card-body" id="discussionFormContainer">
+                        <div id="discussionFormError" class="alert alert-danger d-none"></div>
+                        {{ form_start(discussionForm, {'action': path('app_discussion_add', {'id': theme.id}), 'attr': {'id': 'discussionForm'}}) }}
+                            {{ form_widget(discussionForm.contenu, {
+                                'attr': {
+                                    'rows': 5,
+                                    'placeholder': 'Écrivez votre message ici... (max 5000 caractères)'
+                                }
+                            }) }}
+                            <div class="text-end mt-2">
+                                <span id="charCount" class="text-muted me-3">0 / 5000</span>
+                                <button type="submit" class="btn btn-success">Enregistrer</button>
+                            </div>
+                        {{ form_end(discussionForm) }}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning mt-4">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Connectez-vous</a>
+                ou <a href="{{ path('app_register') }}">inscrivez-vous</a> pour ajouter une discussion.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // ui
+    const formContainer = document.getElementById('discussionFormContainer');
+    const closeBtn = document.getElementById('closeFormBtn');
+    const textarea = document.querySelector('.discussion-textarea');
+    const charCount = document.getElementById('charCount');
+    const discussionList = document.getElementById('discussion-list');
+    const discussionForm = document.getElementById('discussionForm');
+    const discussionFormError = document.getElementById('discussionFormError');
+
+    closeBtn?.addEventListener('click', function() {
+        formContainer.style.display = 'none';
+        closeBtn.textContent = 'Ouvrir';
+        closeBtn.addEventListener('click', function() {
+            formContainer.style.display = 'block';
+            closeBtn.textContent = 'Fermer';
+        }, { once: true });
+    });
+
+    textarea?.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = count + ' / 5000';
+        if (count > 5000) {
+            charCount.classList.add('text-danger');
+        } else {
+            charCount.classList.remove('text-danger');
+        }
+    });
+
+    discussionForm?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        discussionFormError?.classList.add('d-none');
+
+        const formData = new FormData(discussionForm);
+
+        try {
+            const response = await fetch(discussionForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+                discussionFormError.textContent = data.error || 'Erreur lors de l\'ajout de la discussion';
+                discussionFormError.classList.remove('d-none');
+                return;
+            }
+
+            if (discussionList && data.html) {
+                const emptyAlert = discussionList.querySelector('.alert');
+                if (emptyAlert) {
+                    discussionList.innerHTML = data.html;
+                } else {
+                    discussionList.insertAdjacentHTML('beforeend', data.html);
+                }
+            }
+
+            formContainer.innerHTML = `
+                <div class=\"alert alert-success mb-3\">Discussion ajoutée</div>
+                ${data.html || ''}
+            `;
+        } catch (err) {
+            discussionFormError.textContent = 'Erreur réseau, réessaye';
+            discussionFormError.classList.remove('d-none');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supprimer la discussion - Forum{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_theme_show', {'id': discussion.theme.id}) }}">
+                        {{ discussion.theme.titre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Supprimer la discussion</li>
+            </ol>
+        </nav>
+
+        
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Confirmer la suppression</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Attention !</strong> Cette action est irréversible.
+                </div>
+
+                <p>Vous êtes sur le point de supprimer la discussion suivante :</p>
+
+                
+                <div class="discussion-box mb-4">
+                    <p class="mb-2">{{ discussion.contenu|nl2br }}</p>
+                    <p class="discussion-meta mb-0">
+                        Par <strong>{{ discussion.auteur.pseudo }}</strong>
+                        le {{ discussion.createdAt|date('d/m/Y à H:i') }}
+                    </p>
+                </div>
+
+                
+                <form method="post" action="{{ path('app_discussion_delete', {'id': discussion.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ discussion.id) }}">
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_theme_show', {'id': discussion.theme.id}) }}"
+                           class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-danger">
+                            Confirmer la suppression
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
