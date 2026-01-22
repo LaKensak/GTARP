@@ -20,6 +20,12 @@ class MailerService
 
     public function sendConfirmationEmail(User $user): void
     {
+        // skip
+        $dsn = getenv('MAILER_DSN') ?: '';
+        if (str_starts_with($dsn, 'file://') || str_starts_with($dsn, 'null://')) {
+            return;
+        }
+
         $confirmationUrl = $this->buildConfirmationUrl($user);
 
         $email = (new TemplatedEmail())

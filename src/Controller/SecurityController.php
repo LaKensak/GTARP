@@ -57,7 +57,7 @@ class SecurityController extends AbstractController
 
             $this->addFlash('success', 'Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
 
-            if (str_starts_with($mailerDsn, 'file://')) {
+            if (str_starts_with($mailerDsn, 'file://') || str_starts_with($mailerDsn, 'null://')) {
                 return $this->render('security/registration_pending.html.twig', [
                     'confirmationUrl' => $mailerService->buildConfirmationUrl($user),
                 ]);
