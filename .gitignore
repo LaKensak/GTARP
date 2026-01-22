@@ -7,7 +7,9 @@
 /public/bundles/
 /var/
 /vendor/
-/INSTALLATION_RAPIDE.md
-/NOTE_POUR_LE_PROFESSEUR.md
-/CHECKLIST_RENDU.md
 ###< symfony/framework-bundle ###
+
+###> Fichiers contenant des clés API - NE JAMAIS COMMITTER ###
+CLE_SMTP_BREVO.txt
+test_email.php
+###< Fichiers contenant des clés API ###
