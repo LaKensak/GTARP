@@ -22,17 +22,15 @@ composer install
 
 2. Configurer l'environnement :
 
-**📧 Pour activer l'envoi d'emails :**
+**✅ L'envoi d'emails est déjà configuré !**
 
-Le projet est configuré pour envoyer de vrais emails via Brevo (300 emails/jour gratuits).
+Le projet utilise **Mailtrap** (service de test d'emails gratuit).
+Les emails de confirmation sont capturés dans une inbox Mailtrap au lieu d'être envoyés pour de vrai.
 
-**⚠️ IMPORTANT** : Pour des raisons de sécurité, la clé SMTP n'est PAS dans le dépôt Git.
+**Aucune configuration supplémentaire nécessaire !** Le projet fonctionne directement.
 
-📄 **Consultez le fichier `CLE_SMTP_BREVO.txt`** (fourni séparément) pour :
-- Obtenir la clé SMTP
-- Suivre les instructions de configuration (copier 1 ligne dans `.env`)
-
-**OU** testez sans email (mode par défaut) - le reste du projet fonctionne normalement.
+📧 Pour voir les emails : https://mailtrap.io/inboxes
+📖 Plus d'infos : Consultez [MAILTRAP_INFO.txt](MAILTRAP_INFO.txt)
 
 3. Créer la base de données :
 ```bash
